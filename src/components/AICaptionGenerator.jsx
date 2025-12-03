@@ -20,6 +20,7 @@ const AICaptionGenerator = () => {
         message: "",
         type: "",
     });
+    const [uploadedImageUrl, setUploadedImageUrl] = useState(null);
 
     // const showPopup = (msg, type = "success") => {
     //     setPopup({
@@ -36,15 +37,22 @@ const AICaptionGenerator = () => {
         { id: 'linkedin', name: 'LinkedIn', icon: Linkedin, color: 'bg-blue-700' }
     ];
 
-    const handleImageUpload = (e) => {
+    const handleImageUpload = async (e) => {
         const file = e.target.files[0];
+        const localPreview = URL.createObjectURL(file);
+        setImagePreview(localPreview);
+        setImage(file);
+
+        const formData = new FormData();
+        formData.append("image", file);
         if (file) {
-            setImage(file);
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setImagePreview(reader.result);
-            };
-            reader.readAsDataURL(file);
+            const res = await fetch("http://localhost:3000/upload-image", {
+                method: "POST",
+                body: formData,
+            });
+            const data = await res.json();
+            console.log("Cloudinary URL:", data.imageUrl);
+            setUploadedImageUrl(data.imageUrl);
         }
     };
 
@@ -52,7 +60,6 @@ const AICaptionGenerator = () => {
         setIsGenerating(true);
         // Simulate API call - Replace this with your actual API integration
         if (!scenario.trim()) {
-            // <MessagePopup />
             setPopup({
                 visible: true,
                 message: "Add some scenario to generate caption.",
@@ -74,7 +81,8 @@ const AICaptionGenerator = () => {
                         generateHashtags,
                         includeEmojis,
                         tone,
-                        captionLength
+                        captionLength,
+                        imageUrl: uploadedImageUrl
                     }),
                 });
                 const generatedResponse = await result.json();
