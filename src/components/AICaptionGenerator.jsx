@@ -21,6 +21,7 @@ const AICaptionGenerator = () => {
         type: "",
     });
     const [uploadedImageUrl, setUploadedImageUrl] = useState(null);
+    const API_URL = import.meta.env.VITE_BACKEND_URL;
 
     // const showPopup = (msg, type = "success") => {
     //     setPopup({
@@ -46,7 +47,7 @@ const AICaptionGenerator = () => {
         const formData = new FormData();
         formData.append("image", file);
         if (file) {
-            const res = await fetch("http://localhost:3000/upload-image", {
+            const res = await fetch(`${API_URL}/upload-image`, {
                 method: "POST",
                 body: formData,
             });
@@ -70,7 +71,7 @@ const AICaptionGenerator = () => {
         }
         else {
             try {
-                const result = await fetch(`http://localhost:3000/generate-response`, {
+                const result = await fetch(`${API_URL}/generate-response`, {
                     method: 'POST',
                     headers: {
                         "Content-Type": "application/json"
