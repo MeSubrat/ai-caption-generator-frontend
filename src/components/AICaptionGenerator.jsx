@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Camera, Type, Instagram, Facebook, Twitter, Linkedin, Sparkles, Copy, RefreshCw, Heart, History } from 'lucide-react';
 import LoginCard from './LoginCard';
 import MessagePopup from './MessagePopup';
+import axios from 'axios';
 
 const AICaptionGenerator = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -22,6 +23,10 @@ const AICaptionGenerator = () => {
     });
     const [uploadedImageUrl, setUploadedImageUrl] = useState(null);
     const API_URL = import.meta.env.VITE_BACKEND_URL;
+    const [uploadProgress, setUploadProgress] = useState(0);
+    const [isUploading, setIsUploading] = useState(false);
+    const [uploadSuccess, setUploadSuccess] = useState(false);
+
 
     // const showPopup = (msg, type = "success") => {
     //     setPopup({
@@ -40,26 +45,49 @@ const AICaptionGenerator = () => {
 
     const handleImageUpload = async (e) => {
         const file = e.target.files[0];
+        if (!file) return;
+
+        // ✅ Instant local preview
         const localPreview = URL.createObjectURL(file);
         setImagePreview(localPreview);
         setImage(file);
 
+        setUploadProgress(0);
+        setUploadSuccess(false);
+        setIsUploading(true);
+
         const formData = new FormData();
         formData.append("image", file);
-        if (file) {
-            const res = await fetch(`${API_URL}/upload-image`, {
-                method: "POST",
-                body: formData,
+
+        try {
+            const res = await axios.post(`${API_URL}/upload-image`, formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+                onUploadProgress: (progressEvent) => {
+                    const percentCompleted = Math.round(
+                        (progressEvent.loaded * 100) / progressEvent.total
+                    );
+                    setUploadProgress(percentCompleted);
+                },
             });
-            const data = await res.json();
-            console.log("Cloudinary URL:", data.imageUrl);
-            setUploadedImageUrl(data.imageUrl);
+
+            console.log("✅ Cloudinary URL:", res.data.imageUrl);
+            setUploadedImageUrl(res.data.imageUrl);
+            setUploadSuccess(true);
+        } catch (error) {
+            console.error("❌ Upload failed:", error);
+            alert("Image upload failed!");
+            setImage(null);
+            setImagePreview(null);
+            setUploadProgress(0);
+        } finally {
+            setIsUploading(false);
         }
     };
 
     const handleGenerate = async () => {
         setIsGenerating(true);
-        // Simulate API call - Replace this with your actual API integration
         if (!scenario.trim()) {
             setPopup({
                 visible: true,
@@ -71,12 +99,9 @@ const AICaptionGenerator = () => {
         }
         else {
             try {
-                const result = await fetch(`${API_URL}/generate-response`, {
-                    method: 'POST',
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
+                const result = await axios.post(
+                    `${API_URL}/generate-response`,
+                    {
                         scenario,
                         platform: selectedPlatform,
                         generateHashtags,
@@ -84,9 +109,14 @@ const AICaptionGenerator = () => {
                         tone,
                         captionLength,
                         imageUrl: uploadedImageUrl
-                    }),
-                });
-                const generatedResponse = await result.json();
+                    },
+                    {
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                    }
+                );
+                const generatedResponse = await result.data;
                 setTimeout(() => {
                     // setGeneratedCaption(`✨ Living my best life! Captured this amazing moment that I'll cherish forever. Life is all about creating memories and embracing every adventure. 🌟\n\n#LivingMyBestLife #Adventure #Memories #GoodVibes #InstaDaily`);
                     setGeneratedCaption(`${generatedResponse.response.caption} ${generatedResponse.response.hashtags}`);
@@ -171,6 +201,9 @@ const AICaptionGenerator = () => {
                                                     e.preventDefault();
                                                     setImage(null);
                                                     setImagePreview(null);
+                                                    setUploadedImageUrl(null);
+                                                    setUploadProgress(0);
+                                                    setUploadSuccess(false);
                                                 }}
                                                 className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-red-600"
                                             >
@@ -186,6 +219,31 @@ const AICaptionGenerator = () => {
                                     )}
                                 </label>
                             </div>
+
+                            {/* ✅ Uploading Text */}
+                            {isUploading && (
+                                <p className="text-sm text-blue-600 mt-3 font-medium">
+                                    Uploading image... {uploadProgress}%
+                                </p>
+                            )}
+
+                            {/* ✅ Progress Bar */}
+                            {uploadProgress > 0 && (
+                                <div className="w-full bg-gray-200 rounded-full h-3 mt-2 overflow-hidden">
+                                    <div
+                                        className="h-full transition-all duration-300 bg-purple-600"
+                                        style={{ width: `${uploadProgress}%` }}
+                                    ></div>
+                                </div>
+                            )}
+
+                            {/* ✅ Success Message */}
+                            {uploadSuccess && (
+                                <p className="text-green-600 font-semibold mt-2 text-sm">
+                                    ✅ Image uploaded successfully!
+                                </p>
+                            )}
+
                         </div>
 
                         {/* Platform Selection */}
