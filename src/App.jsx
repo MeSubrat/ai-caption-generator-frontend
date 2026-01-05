@@ -1,4 +1,4 @@
-import { Route, Routes } from 'react-router-dom'
+import { Route, Routes, useLocation } from 'react-router-dom'
 import './App.css'
 import AICaptionGenerator from './components/AICaptionGenerator'
 import LoginScreen from './components/LoginScreen'
@@ -10,7 +10,17 @@ import TemporaryCompo from './components/TemporaryCompo'
 import DashboardHome from './components/DashboardHome'
 import GenerateCaption from './Pages/GenerateCaption'
 import ImageCaption from './Pages/ImageCaption'
+import { useEffect } from 'react'
 function App() {
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.pathname === '/dashboard') {
+      console.log("Hey there")
+      console.warn("⚠️ KICKBACK DETECTED: Something tried to send us to Dashboard.");
+      console.trace(); // This will show exactly what function called the redirect
+    }
+  }, [location]);
   return (
     <>
       <Routes>
