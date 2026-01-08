@@ -14,8 +14,10 @@ const GenerateCaption = () => {
     const [platform, setPlatform] = useState('Instagram');
     const [tone, setTone] = useState('Professional');
     const [includeHashtags, setIncludeHashtags] = useState(true);
+    const [includeEmojis, setIncludeEmojis] = useState(true);
     const [description, setDescription] = useState("");
     const [favorited, setFavorited] = useState(false);
+    const [length, setLength] = useState(50); // Default to Medium (50%)
 
     const handleCopy = () => {
         setCopied(true);
@@ -23,8 +25,9 @@ const GenerateCaption = () => {
     };
 
     const renderMobilePreview = () => {
-        const displayText = description || "Your AI generated caption will appear here...";
+        const displayText = description || `Your AI generated caption will appear here...${includeEmojis ? '😇❤️' : ''}`;
         const tags = includeHashtags ? "#AI #Innovation #CaptionAI" : "";
+        // includeEmojis ? displayText + '😇❤️' : displayText;
 
         switch (platform) {
             case 'Twitter':
@@ -216,6 +219,68 @@ const GenerateCaption = () => {
                                     </button>
                                 </div>
 
+                                {/* Emoji Toggle Glass */}
+                                <div className="flex items-center justify-between p-5 bg-indigo-600/5 rounded-3xl border border-indigo-600/10 mb-10">
+                                    <div className="flex items-center gap-4">
+                                        <div className="p-3 bg-white rounded-2xl shadow-sm text-indigo-600"><Smile size={20} /></div>
+                                        <div>
+                                            <span className="text-sm font-bold text-gray-800 block">AI Emojis</span>
+                                            <span className="text-[10px] text-indigo-600 font-medium italic underline">Optimized for {platform}</span>
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={() => setIncludeEmojis(!includeEmojis)}
+                                        className={`w-12 h-6 rounded-full relative transition-all duration-300 ${includeEmojis ? 'bg-indigo-600' : 'bg-gray-300'}`}
+                                    >
+                                        <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-md transition-all ${includeEmojis ? 'right-1' : 'left-1'}`} />
+                                    </button>
+                                </div>
+
+                                {/* --- Length Slider with Platform Insights --- */}
+                                <div className="mb-10">
+                                    <div className="flex justify-between items-center mb-4">
+                                        <div className="flex items-center gap-2">
+                                            <Zap size={14} className="text-indigo-600" />
+                                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Caption Length</label>
+                                        </div>
+                                        <span className="text-[10px] font-black text-indigo-600 bg-indigo-50 px-3 py-1 rounded-lg border border-indigo-100 uppercase tracking-tighter">
+                                            {length < 33 ? 'Short' : length < 66 ? 'Medium' : 'Long'}
+                                        </span>
+                                    </div>
+
+                                    <div className="relative flex items-center group mb-4">
+                                        <input
+                                            type="range"
+                                            min="0"
+                                            max="100"
+                                            value={length}
+                                            onChange={(e) => setLength(parseInt(e.target.value))}
+                                            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600 hover:accent-purple-600 transition-all"
+                                        />
+                                    </div>
+
+                                    {/* --- Dynamic Insight Box --- */}
+                                    <div className="p-4 rounded-2xl bg-white/50 border border-white/80 shadow-sm transition-all duration-300">
+                                        <div className="flex gap-3 items-start">
+                                            <div className="mt-1 p-1.5 bg-indigo-100 rounded-lg text-indigo-600">
+                                                <Sparkles size={22} />
+                                            </div>
+                                            <div>
+                                                <p className="text-l font-bold text-gray-700 -mb-1">
+                                                    {length < 33 ? "Punchy & Direct" : length < 66 ? "Engaging & Balanced" : "Storytelling & Detail"}
+                                                </p>
+                                                <p className="text-[11px] text-gray-500 leading-relaxed">
+                                                    {length < 33
+                                                        ? "Best for Twitter (X) or Threads. Focuses on a single strong hook and quick call-to-action."
+                                                        : length < 66
+                                                            ? "Perfect for Instagram and Facebook. Great for building engagement with a mix of context and flair."
+                                                            : "Ideal for LinkedIn or Blogs. Uses deep-dive storytelling to establish authority and provide value."}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 {/* THE MAGIC BUTTON */}
                                 <button
                                     className="group relative w-full overflow-hidden bg-gray-900 text-white py-5 rounded-3xl font-black text-sm tracking-widest uppercase transition-all hover:bg-black hover:shadow-[0_0_40px_rgba(79,70,229,0.3)] active:scale-95"
@@ -253,8 +318,8 @@ const GenerateCaption = () => {
                                     <button
                                         onClick={() => setFavorited(!favorited)}
                                         className={`flex-1 border-2 flex items-center justify-center rounded-xl transition-all shadow-lg ${favorited
-                                                ? 'bg-red-50 border-red-500 text-red-500'
-                                                : 'bg-white border-gray-900 text-gray-900 hover:bg-gray-100'
+                                            ? 'bg-red-50 border-red-500 text-red-500'
+                                            : 'bg-white border-gray-900 text-gray-900 hover:bg-gray-100'
                                             }`}
                                     >
                                         <Heart size={16} className={favorited ? "fill-red-500" : ""} />
