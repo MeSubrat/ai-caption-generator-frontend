@@ -32,16 +32,22 @@ const LoginScreen = ({ setIsAuthenticated }) => {
 
         try {
             const apiUrl = import.meta.env.VITE_API_URL;
+            // console.log(apiUrl, formData.email, formData.password);
             if (formData.email && formData.password) {
                 const response = await axios.post(`${apiUrl}/login-user`, {
                     email: formData.email,
                     password: formData.password
                 })
-                console.log('Response: ', response);
+                // console.log('Response: ', response);
                 showPopup('Login successful!', 'success');
-                setInterval(() => {
-                    navigate('/home-page');
-                }, 1000);
+                // 1. Save data to localStorage so Dashboard can see it
+                // Adjust response.data.user.name based on your actual API response structure
+                const userName = response.data.fullname || response.data.user?.name || "User";
+                localStorage.setItem("userName", userName);
+                localStorage.setItem("isAuthenticated", "true");
+                // setInterval(() => {
+                // }, 1000);
+                navigate('/dashboard');
             } else {
                 showPopup('Please fill in all fields', 'error');
             }

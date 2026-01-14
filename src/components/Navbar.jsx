@@ -19,10 +19,10 @@ const Navbar = () => {
     const location = useLocation();
 
     const navLinks = [
-        { name: 'Dashboard', href: '/dashboard' },
-        { name: 'History', href: '/caption-history' },
-        { name: 'Marketplace', href: '/marketplace' },
-        { name: 'Learn', href: '/tutorials' },
+        { name: 'Dashboard', path: '/dashboard' },
+        { name: 'History', path: '/caption-history' },
+        { name: 'Marketplace', path: '/marketplace' },
+        { name: 'Learn', path: '/tutorials' },
     ];
 
     // Helper to check active state based on route
@@ -36,7 +36,7 @@ const Navbar = () => {
                     {/* Left Section: Branding */}
                     <div
                         className="flex items-center gap-2 cursor-pointer group shrink-0"
-                        onClick={() => navigate('/dashboard')}
+                        // onClick={() => navigate('/dashboard')}
                     >
                         <div className="rounded-lg p-1.5 bg-indigo-600 text-white shadow-sm group-hover:bg-indigo-700 transition-colors">
                             <Store size={16} strokeWidth={2.5} />
@@ -48,27 +48,41 @@ const Navbar = () => {
                     </div>
 
                     {/* Center Section: Desktop Links */}
-                    <div className="hidden md:flex items-center gap-6">
+                    {/* <div className="hidden md:flex items-center gap-6">
                         {navLinks.map((link) => (
-                            <a
+                            <button
                                 key={link.name}
-                                href={link.href}
-                                className={`text-xs font-semibold uppercase tracking-wider transition-all hover:text-indigo-600 ${isActive(link.href)
-                                        ? 'text-indigo-600'
-                                        : 'text-gray-500'
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    navigate(link.href);
+                                }}
+                                className={`text-xs font-semibold uppercase tracking-wider transition-all hover:text-indigo-600 ${isActive(link.href) ? "text-indigo-600" : "text-gray-500"
                                     }`}
                             >
                                 {link.name}
-                            </a>
+                            </button>
+                        ))}
+                    </div> */}
+                    <div className="hidden md:flex items-center gap-6">
+                        {navLinks.map((link) => (
+                            <button
+                                key={link.name}
+                                onClick={(e) =>
+                                    // navigate("/generate-caption")
+                                    navigate(link.path)
+                                }
+                                className={`text-xs font-semibold uppercase tracking-wider transition-all hover:text-indigo-600 ${isActive(link.path) ? "text-indigo-600" : "text-gray-500"
+                                    }`}
+                            >
+                                {link.name}
+                            </button>
                         ))}
                     </div>
 
                     {/* Right Section: Actions */}
                     <div className="flex items-center gap-1 sm:gap-3">
                         {/* Hidden on mobile to keep bar clean; mobile menu has it instead */}
-                        {/* <div className="hidden lg:block">
-                            <GenerateCaptionButton />
-                        </div> */}
 
                         <div className="flex items-center border-l border-gray-100 ml-2 pl-2 sm:gap-1">
                             <button className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-gray-50 rounded-full transition-all">
@@ -103,21 +117,39 @@ const Navbar = () => {
                     <div className="flex flex-col p-4 space-y-3">
                         {/* Mobile-only CTA */}
                         <div className="pb-2">
-                            <GenerateCaptionButton />
+                            {/* <GenerateCaptionButton /> */}
+                            <GenerateCaptionButton onClick={() => {
+                                navigate('/generate-caption');
+                                setIsMobileMenuOpen(false); // Also close the menu!
+                            }} />
                         </div>
 
                         {navLinks.map((link) => (
-                            <a
+                            // <a
+                            //     key={link.name}
+                            //     href={link.href}
+                            //     className={`flex items-center justify-between p-3 rounded-xl text-sm font-bold ${isActive(link.href)
+                            //         ? 'bg-indigo-50 text-indigo-700'
+                            //         : 'text-gray-600 hover:bg-gray-50'
+                            //         }`}
+                            // >
+                            //     {link.name}
+                            //     {isActive(link.href) && <Sparkles size={14} />}
+                            // </a>
+                            <button
                                 key={link.name}
-                                href={link.href}
-                                className={`flex items-center justify-between p-3 rounded-xl text-sm font-bold ${isActive(link.href)
-                                        ? 'bg-indigo-50 text-indigo-700'
-                                        : 'text-gray-600 hover:bg-gray-50'
+                                onClick={() => {
+                                    navigate(link.path);
+                                    setIsMobileMenuOpen(false); // closes menu after routing
+                                }}
+                                className={`flex items-center justify-between p-3 rounded-xl text-sm font-bold ${isActive(link.path)
+                                    ? "bg-indigo-50 text-indigo-700"
+                                    : "text-gray-600 hover:bg-gray-50"
                                     }`}
                             >
                                 {link.name}
                                 {isActive(link.href) && <Sparkles size={14} />}
-                            </a>
+                            </button>
                         ))}
 
                         <div className="pt-4 mt-2 border-t border-gray-100 grid grid-cols-2 gap-3">
