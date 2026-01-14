@@ -5,6 +5,7 @@ import {
     MoreHorizontal, Heart, MessageCircle, Send, Zap, MousePointer2
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const GenerateCaption = () => {
     const navigate = useNavigate();
@@ -18,16 +19,60 @@ const GenerateCaption = () => {
     const [description, setDescription] = useState("");
     const [favorited, setFavorited] = useState(false);
     const [length, setLength] = useState(50); // Default to Medium (50%)
+    const [tags, setTags] = useState('');
+    const [captionData, setCaptionData] = useState('');
+
+    const apiUrl = import.meta.env.VITE_API_URL;
 
     const handleCopy = () => {
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
     };
+    const SkeletonLine = ({ width }) => (
+        <div
+            className="h-3 bg-gray-200 rounded-full animate-pulse mb-2"
+            style={{ width: width }}
+        />
+    );
 
     const renderMobilePreview = () => {
-        const displayText = description || `Your AI generated caption will appear here...${includeEmojis ? '😇❤️' : ''}`;
-        const tags = includeHashtags ? "#AI #Innovation #CaptionAI" : "";
-        // includeEmojis ? displayText + '😇❤️' : displayText;
+        // If loading, show the Skeleton Loader UI
+        if (loading) {
+            return (
+                <div className="space-y-4 animate-in fade-in duration-500">
+                    {/* Simulated Profile Header */}
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse" />
+                        <div className="w-24 h-3 bg-gray-200 rounded-full animate-pulse" />
+                    </div>
+
+                    {/* Simulated Image Placeholder (for IG/FB) */}
+                    {(platform === 'Instagram' || platform === 'Facebook') && (
+                        <div className="w-full aspect-square bg-gray-100 rounded-xl animate-pulse flex items-center justify-center">
+                            <Sparkles className="text-gray-200" size={40} />
+                        </div>
+                    )}
+
+                    {/* Shimmering Text Lines */}
+                    <div className="space-y-2 mt-4">
+                        <SkeletonLine width="90%" />
+                        <SkeletonLine width="100%" />
+                        <SkeletonLine width="75%" />
+                    </div>
+
+                    {/* Shimmering Hashtags */}
+                    {includeHashtags && (
+                        <div className="flex gap-2 mt-4">
+                            <div className="w-12 h-3 bg-indigo-100 rounded-full animate-pulse" />
+                            <div className="w-16 h-3 bg-indigo-100 rounded-full animate-pulse" />
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        const displayText = captionData || description || `Your AI generated caption will appear here...${includeEmojis ? '😇❤️' : ''}`;
+        // const tags = includeHashtags ? "#AI #Innovation #CaptionAI" : "";
 
         switch (platform) {
             case 'Twitter':
@@ -104,6 +149,26 @@ const GenerateCaption = () => {
                 );
         }
     };
+    const handleSubmit = async () => {
+        try {
+            if (!description.trim()) {
+                setLoading(true);
+                const response = await axios.post(`${apiUrl}/text-caption`, {
+                    description,
+                    platform,
+                    includeHashtags,
+                    includeEmojis,
+                    tone,
+                    length
+                });
+                setLoading(false);
+                setCaptionData(response?.data.result.caption);
+            }
+        } catch (error) {
+            console.log('Error: ', error.response?.data || error.message);
+        }
+
+    }
 
     return (
         <div className="min-h-screen relative overflow-hidden bg-[#fafafa]">
@@ -284,7 +349,7 @@ const GenerateCaption = () => {
                                 {/* THE MAGIC BUTTON */}
                                 <button
                                     className="group relative w-full overflow-hidden bg-gray-900 text-white py-5 rounded-3xl font-black text-sm tracking-widest uppercase transition-all hover:bg-black hover:shadow-[0_0_40px_rgba(79,70,229,0.3)] active:scale-95"
-                                    onClick={() => { setLoading(true); setTimeout(() => setLoading(false), 2000); }}
+                                    onClick={() => handleSubmit()}
                                 >
                                     <div className="relative z-10 flex items-center justify-center gap-3">
                                         {loading ? "Brewing Magic..." : <><Sparkles size={20} className="text-indigo-400" /> Generate Caption</>}

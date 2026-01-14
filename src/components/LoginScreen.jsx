@@ -38,7 +38,7 @@ const LoginScreen = ({ setIsAuthenticated }) => {
                     email: formData.email,
                     password: formData.password
                 })
-                console.log('Response: ', response);
+                // console.log('Response: ', response);
                 showPopup('Login successful!', 'success');
                 // 1. Save data to localStorage so Dashboard can see it
                 // Adjust response.data.user.name based on your actual API response structure
